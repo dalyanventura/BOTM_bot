@@ -6,7 +6,7 @@ import os
 from . import config
 
 DATABASE_URI = config.DATABASE_URI
-uri = os.getenv("DATABASE_URI")
+uri = os.getenv("DATABASE_URL")
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 
