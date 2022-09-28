@@ -45,6 +45,7 @@ def process_commands(session, client, message, command):
                 for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all():
                     response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
                 response += '```'
+
         elif len(command.split()) == 4:
             for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%'), Cartes.univers.like('%' + command.split()[2] + '%'), Cartes.niveau == command.split()[3]).all():
                 return embed_cartes(card)
