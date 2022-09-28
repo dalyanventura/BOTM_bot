@@ -16,6 +16,7 @@ def process_commands(session, client, message, command):
 ! help : affiche ce message
 ! cartes <nom> : affiche la liste des cartes qui contiennent <nom>
 ! cartes <nom> <univers> <niveau>: affiche la carte qui contient <nom> <univers> <niveau> (Si l'univers est en deux mots, mettre un underscore)
+! cartes random : affiche une carte au hasard
 ! points : affiche le nombre de points de l'utilisateur
 ! pick : permet de piocher une carte
 ! pick <nombre> : permet de piocher <nombre> cartes
@@ -40,6 +41,19 @@ def process_commands(session, client, message, command):
                 file = discord.File(f"images/{card.nom}.gif")
                 response.set_image(url=f"attachment://{card.nom}.gif")
                 return response, file
+        elif len(command.split()) == 3 and command.split()[2] == 'random':
+            card = session.query(Cartes).order_by(func.random()).first()
+            response = discord.embeds.Embed(title=f"{card.nom}")
+            response.add_field(name="Univers", value=card.univers)
+            response.add_field(name="Niveau", value=card.niveau)
+            response.add_field(name="Force", value=card.force)
+            response.add_field(name="Mana", value=card.mana)
+            response.add_field(name="Vitesse", value=card.vitesse)
+            response.add_field(name="Popularité", value=card.popularite)
+            gdown.download(card.image, f"images/{card.nom}.gif", quiet=False)
+            file = discord.File(f"images/{card.nom}.gif")
+            response.set_image(url=f"attachment://{card.nom}.gif")
+            return response, file
         else:
             response = '```! cartes <nom> : affiche la liste des cartes qui contiennent <nom>\n! cartes <nom> <univers> <niveau>: affiche la carte qui contient <nom> <univers> <niveau> (Si l\'univers est en deux mots, mettre un underscore)```'
     elif command.startswith('points'):
