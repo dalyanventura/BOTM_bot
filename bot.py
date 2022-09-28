@@ -63,4 +63,5 @@ async def on_message(message):
                 await message.channel.send(embed=response)
 
 # client.run(AKATOSH_BOT_TOKEN)
-client.run("BOTM_PEGASUS_TOKEN")
+token = os.getenv("BOTM_PEGASUS_TOKEN")
+client.run(token)
