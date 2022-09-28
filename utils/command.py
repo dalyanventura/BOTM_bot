@@ -1,4 +1,5 @@
 import discord
+from sqlalchemy import func
 
 from botm.cartes.models import Cartes
 from botm.joueurs.models import Joueurs
@@ -29,7 +30,6 @@ def process_commands(session, client, message, command):
             response += '```'
         elif len(command.split()) == 4:
             for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%'), Cartes.univers.like('%' + command.split()[2] + '%'), Cartes.niveau == command.split()[3]).all():
-                #response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
                 response = discord.embeds.Embed(title=f"{card.nom}")
                 response.add_field(name="Univers", value=card.univers)
                 response.add_field(name="Niveau", value=card.niveau)
@@ -41,7 +41,7 @@ def process_commands(session, client, message, command):
                 file = discord.File(f"images/{card.nom}.gif")
                 response.set_image(url=f"attachment://{card.nom}.gif")
                 return response, file
-        elif len(command.split()) == 3 and command.split()[2] == 'random':
+        elif len(command.split()) == 2 and command.split()[1] == 'random':
             card = session.query(Cartes).order_by(func.random()).first()
             response = discord.embeds.Embed(title=f"{card.nom}")
             response.add_field(name="Univers", value=card.univers)
