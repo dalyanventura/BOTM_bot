@@ -52,11 +52,12 @@ async def on_message(message):
 
     response = process_commands(session, client, message, command)
     if response is not None:
-        if len(response) == 2:
+
+        if type(response) is str:
+            await message.channel.send(response)
+        elif type(response) is tuple:
             print(response[0])
             await message.channel.send(embed=response[0], file=response[1])
-        elif type(response) is str:
-            await message.channel.send(response)
         else:
             await message.channel.send(embed=response)
 
