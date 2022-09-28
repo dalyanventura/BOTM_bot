@@ -49,18 +49,16 @@ async def on_message(message):
     print(command)
 
     # On traite la commande
-    if command.startswith('cartes') and len(command.split()) == 4:
-        print("Test avec image !")
-        response, file = process_commands(session, client, message, command)
-        if response is not None:
-            await message.channel.send(embed=response, file=file)
-    else:
-        response = process_commands(session, client, message, command)
-        if response is not None:
-            if type(response) is str:
-                await message.channel.send(response)
-            else:
-                await message.channel.send(embed=response)
+
+    response = process_commands(session, client, message, command)
+    if response is not None:
+        if type(response) is str:
+            await message.channel.send(response)
+        elif type(response) is tuple:
+            print(response[0])
+            await message.channel.send(embed=response[0], file=response[1])
+        else:
+            await message.channel.send(embed=response)
 
 # client.run(AKATOSH_BOT_TOKEN)
 token = os.getenv("BOTM_PEGASUS_TOKEN")

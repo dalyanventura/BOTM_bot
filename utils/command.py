@@ -9,6 +9,19 @@ from botm import config
 import requests
 import gdown
 
+def embed_cartes(card):
+    response = discord.embeds.Embed(title=f"{card.nom}")
+    response.add_field(name="Univers", value=card.univers)
+    response.add_field(name="Niveau", value=card.niveau)
+    response.add_field(name="Force", value=card.force)
+    response.add_field(name="Mana", value=card.mana)
+    response.add_field(name="Vitesse", value=card.vitesse)
+    response.add_field(name="Popularité", value=card.popularite)
+    gdown.download(card.image, f"images/{card.nom}.gif", quiet=False)
+    file = discord.File(f"images/{card.nom}.gif")
+    response.set_image(url=f"attachment://{card.nom}.gif")
+    return response, file
+
 def process_commands(session, client, message, command):
     # On traite la commande
     response = None
@@ -23,37 +36,21 @@ def process_commands(session, client, message, command):
 ! pick <nombre> : permet de piocher <nombre> cartes
 ```"""
     elif command.startswith('cartes'):
-        if len(command.split()) == 2:
+        if len(command.split()) == 2 and command.split()[1] != 'random':
             response = '```'
-            for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all():
-                response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
-            response += '```'
+            if len(session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all()) == 1:
+                card = session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).first()
+                return embed_cartes(card)
+            else:
+                for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all():
+                    response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
+                response += '```'
         elif len(command.split()) == 4:
             for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%'), Cartes.univers.like('%' + command.split()[2] + '%'), Cartes.niveau == command.split()[3]).all():
-                response = discord.embeds.Embed(title=f"{card.nom}")
-                response.add_field(name="Univers", value=card.univers)
-                response.add_field(name="Niveau", value=card.niveau)
-                response.add_field(name="Force", value=card.force)
-                response.add_field(name="Mana", value=card.mana)
-                response.add_field(name="Vitesse", value=card.vitesse)
-                response.add_field(name="Popularité", value=card.popularite)
-                gdown.download(card.image, f"images/{card.nom}.gif", quiet=False)
-                file = discord.File(f"images/{card.nom}.gif")
-                response.set_image(url=f"attachment://{card.nom}.gif")
-                return response, file
+                return embed_cartes(card)
         elif len(command.split()) == 2 and command.split()[1] == 'random':
             card = session.query(Cartes).order_by(func.random()).first()
-            response = discord.embeds.Embed(title=f"{card.nom}")
-            response.add_field(name="Univers", value=card.univers)
-            response.add_field(name="Niveau", value=card.niveau)
-            response.add_field(name="Force", value=card.force)
-            response.add_field(name="Mana", value=card.mana)
-            response.add_field(name="Vitesse", value=card.vitesse)
-            response.add_field(name="Popularité", value=card.popularite)
-            gdown.download(card.image, f"images/{card.nom}.gif", quiet=False)
-            file = discord.File(f"images/{card.nom}.gif")
-            response.set_image(url=f"attachment://{card.nom}.gif")
-            return response, file
+            return embed_cartes(card)
         else:
             response = '```! cartes <nom> : affiche la liste des cartes qui contiennent <nom>\n! cartes <nom> <univers> <niveau>: affiche la carte qui contient <nom> <univers> <niveau> (Si l\'univers est en deux mots, mettre un underscore)```'
     elif command.startswith('points'):
