@@ -24,7 +24,21 @@ def process_commands(session, client, message, command):
         if len(command.split()) == 2:
             response = '```'
             for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all():
-                response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
+                # print(session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all())
+                if len(session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%')).all()) == 1:
+                    response = discord.embeds.Embed(title=f"{card.nom}")
+                    response.add_field(name="Univers", value=card.univers)
+                    response.add_field(name="Niveau", value=card.niveau)
+                    response.add_field(name="Force", value=card.force)
+                    response.add_field(name="Mana", value=card.mana)
+                    response.add_field(name="Vitesse", value=card.vitesse)
+                    response.add_field(name="Popularité", value=card.popularite)
+                    gdown.download(card.image, f"images/{card.nom}.png", quiet=False)
+                    file = discord.File(f"images/{card.nom}.png")
+                    response.set_image(url=f"attachment://{card.nom}.png")
+                    return response, file
+                else:
+                    response += f"{card.nom} ({card.univers}) Niveau: {card.niveau} Force: {card.force} Mana: {card.mana} Vitesse: {card.vitesse} Popularité: {card.popularite}\n"
             response += '```'
         elif len(command.split()) == 4:
             for card in session.query(Cartes).filter(Cartes.nom.like('%' + command.split()[1] + '%'), Cartes.univers.like('%' + command.split()[2] + '%'), Cartes.niveau == command.split()[3]).all():
