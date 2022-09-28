@@ -36,9 +36,9 @@ def process_commands(session, client, message, command):
                 response.add_field(name="Mana", value=card.mana)
                 response.add_field(name="Vitesse", value=card.vitesse)
                 response.add_field(name="Popularité", value=card.popularite)
-                gdown.download(card.image, f"images/{card.nom}.png", quiet=False)
-                file = discord.File(f"images/{card.nom}.png")
-                response.set_image(url=f"attachment://{card.nom}.png")
+                gdown.download(card.image, f"images/{card.nom}.gif", quiet=False)
+                file = discord.File(f"images/{card.nom}.gif")
+                response.set_image(url=f"attachment://{card.nom}.gif")
                 return response, file
         else:
             response = '```! cartes <nom> : affiche la liste des cartes qui contiennent <nom>\n! cartes <nom> <univers> <niveau>: affiche la carte qui contient <nom> <univers> <niveau> (Si l\'univers est en deux mots, mettre un underscore)```'
