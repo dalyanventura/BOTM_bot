@@ -2,11 +2,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import os
 from . import config
 
 DATABASE_URI = config.DATABASE_URI
+uri = os.getenv("DATABASE_URI")
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URI, echo=True)
+
+# engine = create_engine(DATABASE_URI, echo=True)
+engine = create_engine(uri, echo=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
