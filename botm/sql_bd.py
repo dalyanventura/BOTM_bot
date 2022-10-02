@@ -79,38 +79,33 @@ class CartesJoueurs(Base):
 # The main part
 if __name__ == '__main__':
 
-    joueurs = pd.read_csv('../player.tsv', sep='\t')
-    cartes = pd.read_csv('../cartes.tsv', sep='\t')
+    joueurs_cartes = pd.read_csv('joueurs_cartes.tsv', sep='\t')
 
-    rprint(cartes)
-    rprint(joueurs)
+    rprint(joueurs_cartes)
 
     # engine = create_engine('sqlite:///demo.db', echo=False)
     engine = create_engine(config.DATABASE_URI, echo=False)
 
     print("--- Construct all tables for the database (here just one table) ---")
-    Base.metadata.create_all(engine)  # Only for the first time
 
     print("--- Create three new contacts and push its into the database ---")
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # for i in range(len(joueurs)):
-    #     j = Joueurs(i, joueurs['Pseudo'][i], joueurs['Points'][i], joueurs['Picks'][i])
-    #     session.add(j)
-
-    for i in range(len(cartes)):
-        c = Cartes(i, cartes['Nom'][i], cartes['Univers'][i], cartes['Niveau'][i], cartes['Force'][i], cartes['Mana'][i], cartes['Vitesse'][i], cartes['Popularité'][i], cartes['Prix'][i], cartes['Image'][i])
-        session.add(c)
+    for i in range(len(joueurs_cartes)):
+        id_cartes = session.query(Cartes.id_carte).filter(Cartes.nom == joueurs_cartes['Nom_carte'][i], Cartes.niveau == joueurs_cartes['Niveau'][i],
+                                                          Cartes.univers == joueurs_cartes['Univers'][i], Cartes.force == joueurs_cartes['Force'][i],
+                                                          Cartes.mana == joueurs_cartes['Mana'][i], Cartes.vitesse == joueurs_cartes['Vitesse'][i],
+                                                          Cartes.popularite == joueurs_cartes['Popularité'][i]).first()
+        # print(id_cartes)
+        try:
+            c_j = CartesJoueurs(id_cartes[0], joueurs_cartes['ID_j'][i], joueurs_cartes['Nombre_cartes'][i])
+        except TypeError:
+            print("Carte non trouvée : ", joueurs_cartes['Nom_carte'][i], joueurs_cartes['Niveau'][i], joueurs_cartes['Univers'][i],
+                    joueurs_cartes['Force'][i], joueurs_cartes['Mana'][i], joueurs_cartes['Vitesse'][i], joueurs_cartes['Popularité'][i])
+        session.add(c_j)
 
     session.commit()
-
-    print("--- Print all contacts ---")
-    for contact in session.query(Joueurs).all():
-        print(contact.id_j, contact.pseudo, contact.points, contact.pick_nb)
-
-    for carte in session.query(Cartes).all():
-        print(carte.id_carte, carte.nom, carte.niveau, carte.univers, carte.force, carte.mana, carte.vitesse, carte.popularite, carte.prix, carte.image)
 
     # Close the session
     session.close()
@@ -119,37 +114,3 @@ if __name__ == '__main__':
 
     # Close the database
     engine.dispose()
-
-    #
-    # doe = Contact(1)
-    # session.add(doe)
-    #
-    # james = Contact(3, "James", "Bond")
-    # session.add(james)
-    #
-    # jason = Contact(4, "Jason", "Bourne")
-    # session.add(jason)
-    #
-    # # session.add_all( [ doe, james, jason ] )
-    # session.commit()
-    #
-    # print("--- First select by primary key ---")
-    # contact = session.query(Contact).get(3)
-    # print(contact)
-    #
-    # print("--- Second select by firstName ---")
-    # searchedContacts = session.query(Contact).filter(Contact.firstName.startswith("Ja"))
-    # for c in searchedContacts: print(c)
-    #
-    # print("--- Third select all contacts ---")
-    # agenda = session.query(Contact)  # .filter_by( firstName='James' )
-    # for c in agenda: print(c)
-    #
-    # print("--- Try to update a specific contact ---")
-    # contact = session.query(Contact).get(1)
-    # contact.lastName += "!"
-    # session.commit()  # Mandatory
-    #
-    # print("--- Try to delete a specific contact ---")
-    # session.delete(contact)
-    # session.commit()  # Mandatory
