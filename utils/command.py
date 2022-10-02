@@ -202,3 +202,4 @@ def embed_cartes(card):
 #
 #     return response, file
 #
+
