@@ -52,7 +52,7 @@ class BOTM_Bot(commands.Bot):
         print(f'Successfully logged in and booted...!')
 
 
-# bot = BOTM_Bot()
+bot = BOTM_Bot()
 # bot.run(AKATOSH_BOT_TOKEN)
 token = os.getenv("BOTM_PEGASUS_TOKEN")
 bot.run(token)
