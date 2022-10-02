@@ -1,9 +1,14 @@
 import asyncio
+import nest_asyncio
 import datetime
 import os
 from collections.abc import Iterable
 
 import discord
+import aiohttp
+import builtins
+from discord.ext import commands, tasks
+# from discord_components import DiscordComponents
 import json
 
 from secrets import AKATOSH_BOT_TOKEN
@@ -12,55 +17,42 @@ from botm.joueurs.models import Joueurs
 from botm.card_owners.models import CartesJoueurs
 from botm.db import session
 from botm import config
-from utils.command import process_commands
+# from utils.command import process_commands
 
-client = discord.Client(intents=discord.Intents.all())
+nest_asyncio.apply()
 
-@client.event
-async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+def check_author(ctx):
+    if ctx.author == bot.user:
+        return False
 
-@client.event
-async def on_message(message):
-    # Le bot ne doit pas se repondre à lui meme, ce con
-    if message.author == client.user:
-        return
-
-    author = message.author
-    user = session.query(Joueurs).filter_by(id_j=author.id).first()
+    author = ctx.author
+    user = session.query(Joueurs).filter(Joueurs.id_j == author.id).first()
     if user is None:
         user = Joueurs(id_j=author.id, pseudo=author.name, points=2000, pick_nb=2, Admin=False)
         session.add(user)
         session.commit()
 
-    # Si le message n'est pas une commande, on ne fait rien
-    first_word = message.content.split()[0].lower()
-    bot_username = client.user.name.lower()
-    if not first_word.startswith('!') and not first_word.startswith(bot_username):
-        return
+    return True
 
-    print(first_word)
-    # Si le message est une commande, on la traite
-    if first_word.startswith(bot_username) or first_word.startswith('!'):
-        command = ' '.join(message.content.split()[1:])
-    else:
-        command = message.content[1:]
+class BOTM_Bot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix='!', intents=discord.Intents.all())
+        # DiscordComponents(self)
 
-    print(command)
+    async def setup_hook(self):
+        for filename in os.listdir("./cogs"):
+            if filename.endswith(".py"):
+                await self.load_extension(f"cogs.{filename[:-3]}")
 
-    # On traite la commande
+    async def close(self):
+        await super().close()
 
-    response = process_commands(session, client, message, command)
-    if response is not None:
+    async def on_ready(self):
+        print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
+        print(f'Successfully logged in and booted...!')
 
-        if type(response) is str:
-            await message.channel.send(response)
-        elif type(response) is tuple:
-            print(response[0])
-            await message.channel.send(embed=response[0], file=response[1])
-        else:
-            await message.channel.send(embed=response)
 
-# client.run(AKATOSH_BOT_TOKEN)
+# bot = BOTM_Bot()
+# bot.run(AKATOSH_BOT_TOKEN)
 token = os.getenv("BOTM_PEGASUS_TOKEN")
-client.run(token)
+bot.run(token)
