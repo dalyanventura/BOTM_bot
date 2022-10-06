@@ -15,4 +15,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = True
 DEBUG = True
 
+ADMIN_ROLE = 'Conseil de la stat'
+
 COLOR = 0x00ff00

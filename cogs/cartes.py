@@ -19,7 +19,12 @@ class CartesCog(commands.Cog):
     @commands.command(name="carte", aliases=["card"])
     @commands.check(check_author)
     async def carte(self, ctx, *, nom=None, univers=None, niveau=None, force=None, mana=None, vitesse=None, popularite=None, prix=None):
-        if nom is None:
+        args = [nom, univers, niveau, force, mana, vitesse, popularite, prix]
+        cmd_args = ctx.message.content.split(" ")
+        for i in range(1, len(cmd_args)):
+            if args[i - 1] is None:
+                args[i - 1] = cmd_args[i]
+        if args[0] is None:
             await ctx.channel.send("Veuillez entrer un nom de carte")
             return
         card = search_card(nom, univers, niveau, force, mana, vitesse, popularite, prix)
@@ -38,35 +43,40 @@ class CartesCog(commands.Cog):
 
     @commands.command(name="add", aliases=["add_card"])
     @commands.check(check_author)
+    @commands.has_role(config.ADMIN_ROLE)
     async def add(self, ctx, *, nom=None, univers=None, niveau=None, force=None, mana=None, vitesse=None, popularite=None, prix=None, image=None):
-        if nom is None:
+        args = [nom, univers, niveau, force, mana, vitesse, popularite, prix, image]
+        cmd_args = ctx.message.content.split(" ")
+        for i in range(1, len(cmd_args)):
+            args[i-1] = cmd_args[i]
+        if args[0] is None:
             await ctx.channel.send("Veuillez entrer un nom de carte")
             return
-        if univers is None:
+        if args[1] is None:
             await ctx.channel.send("Veuillez entrer un univers")
             return
-        if niveau is None:
+        if args[2] is None:
             await ctx.channel.send("Veuillez entrer un niveau")
             return
-        if force is None:
+        if args[3] is None:
             await ctx.channel.send("Veuillez entrer une force")
             return
-        if mana is None:
+        if args[4] is None:
             await ctx.channel.send("Veuillez entrer un mana")
             return
-        if vitesse is None:
+        if args[5] is None:
             await ctx.channel.send("Veuillez entrer une vitesse")
             return
-        if popularite is None:
+        if args[6] is None:
             await ctx.channel.send("Veuillez entrer une popularité")
             return
-        if prix is None:
+        if args[7] is None:
             await ctx.channel.send("Veuillez entrer un prix")
             return
-        if image is None:
+        if args[8] is None:
             await ctx.channel.send("Veuillez entrer une image")
             return
-        carte = add_card(nom, univers, niveau, force, mana, vitesse, popularite, prix, image)
+        carte = add_card(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8])
         if carte is None:
             await ctx.channel.send("Carte déjà existante")
             return
@@ -76,43 +86,46 @@ class CartesCog(commands.Cog):
 
     @commands.command(name="add_to_user", aliases=["add_card_to_user"])
     @commands.check(check_author)
-
-    async def add_to_user(self, ctx, *, nom=None, univers=None, niveau=None, force=None, mana=None, vitesse=None, popularite=None, prix=None, image=None, user=None):
-        if nom is None:
+    @commands.has_role(config.ADMIN_ROLE)
+    async def add_to_user(self, ctx, *, nom=None, univers=None, niveau=None, force=None, mana=None, vitesse=None, popularite=None, user=None):
+        args = [nom, univers, niveau, force, mana, vitesse, popularite, user]
+        cmd_args = ctx.message.content.split(" ")
+        for i in range(1, len(cmd_args)):
+            args[i - 1] = cmd_args[i]
+        if args[0] is None:
             await ctx.channel.send("Veuillez entrer un nom de carte")
             return
-        if univers is None:
+        if args[1] is None:
             await ctx.channel.send("Veuillez entrer un univers")
             return
-        if niveau is None:
+        if args[2] is None:
             await ctx.channel.send("Veuillez entrer un niveau")
             return
-        if force is None:
+        if args[3] is None:
             await ctx.channel.send("Veuillez entrer une force")
             return
-        if mana is None:
+        if args[4] is None:
             await ctx.channel.send("Veuillez entrer un mana")
             return
-        if vitesse is None:
+        if args[5] is None:
             await ctx.channel.send("Veuillez entrer une vitesse")
             return
-        if popularite is None:
+        if args[6] is None:
             await ctx.channel.send("Veuillez entrer une popularité")
             return
-        if prix is None:
-            await ctx.channel.send("Veuillez entrer un prix")
+        if args[7] is None:
+            await ctx.channel.send("Veuillez entrer le pseudo d'un joueur")
             return
-        if image is None:
-            await ctx.channel.send("Veuillez entrer une image")
+        print(args)
+        carte = search_card(args[0], args[1], args[2], args[3], args[4], args[5], args[6])
+        if carte is None:
+            await ctx.channel.send("Carte non trouvée")
             return
-        if user is None:
-            await ctx.channel.send("Veuillez entrer un utilisateur")
-            return
-        carte = search_card(nom, univers, niveau, force, mana, vitesse, popularite, prix)
-        carte_owner = add_card_to_user(nom, univers, niveau, force, mana, vitesse, popularite, prix, image, user)
+        user = session.query(Joueurs).filter(Joueurs.pseudo == args[7]).first()
+        carte_owner = add_card_to_user(user, carte)
         response, file = embed_cartes(carte)
         response.set_footer(text=f"Carte ajoutée : {carte.nom} ({carte.univers}) pour {user.pseudo}")
-        await ctx.channel.send("Carte ajoutée à l'utilisateur")
+        await ctx.channel.send(embed=response, file=file)
 
 async def setup(bot):
     await bot.add_cog(CartesCog(bot))
