@@ -57,7 +57,8 @@ class DeckCog(commands.Cog):
                 pages.append(response)
                 field_nb = 0
                 response = discord.Embed(title=f"Carte de niveau {card.niveau}", color=config.COLOR)
-            response.add_field(name=f"{card.nom} ({card.univers})", value=f"Niveau {card.niveau}", inline=False)
+            nb_cartes = session.query(CartesJoueurs).filter_by(id_j=ctx.author.id, id_carte=card.id_carte).first().nb_cartes
+            response.add_field(name=f"{card.nom} ({card.univers})", value=f"Niveau {card.niveau} - Nombre : {nb_cartes}", inline=False)
             field_nb += 1
         pages.append(response)
         page=0
