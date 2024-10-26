@@ -47,6 +47,7 @@ heroku ps:restart worker --app <nom de l'application>
 heroku pg:push <nom de la base de données locale> DATABASE_URL --app <nom de l'application>
 ``` 
 
+Gabriel c'est une pute
 
 
 
