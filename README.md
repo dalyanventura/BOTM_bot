@@ -45,9 +45,4 @@ heroku logs --tail --app <nom de l'application>
 heroku ps:restart worker --app <nom de l'application>
 # Pour mettre à jour la base de données
 heroku pg:push <nom de la base de données locale> DATABASE_URL --app <nom de l'application>
-``` 
-
-Gabriel c'est une pute
-
-
-
+```
